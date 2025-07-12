@@ -130,17 +130,32 @@ def search_headphone_model(model_name, category_id, listing_type_filter, seller_
     # Build query with smart exclusions to avoid accessories while keeping refurb opportunities
     # Exclude standalone accessories and parts, but keep actual headphones that need work
     exclusions = [
-        # Standalone accessories (not actual headphones)
-        "ear pads only", "pads only", "earpad only", "ear pad", "earpads", 
+        # Standalone accessories (not actual headphones) - be very specific
+        "ear pads only", "earpads only", "earpad only", "pads only",
+        "ear cushions only", "cushions only", "foam only", 
         "cable only", "cord only", "wire only", "charger only",
         "case only", "pouch only", "bag only", "box only",
         "manual only", "instructions only", "parts only",
-        "replacement parts", "spare parts", "accessory kit",
+        "spare parts", "accessory kit", "accessories only",
         "stand only", "holder only", "hanger only",
+        
+        # Listings that start with compatibility/accessory language (not actual headphones)
+        "compatible with", "fits", "for use with", "designed for",
+        "ltgem case", "khanka case", "co2crea case", "aproca case",
+        
+        # Listings that are clearly just selling accessories/parts (specific patterns)
+        "oem ear pads for", "genuine ear pads for", "original ear pads for",
+        "replacement pads for", "replacement ear pads for", "replacement cushions for",
+        "ear pads for", "ear cushions for", "pads for",
+        "headphone cable for", "headphone cord for", "headphone wire for",
+        "carrying case for", "storage case for", "travel case for", "headphone case for",
+        "carrying pouch for", "storage pouch for", "travel pouch for", "headphone pouch for",
+        "case for", "pouch for",
+        "ear pad set for", "cushion set for", "foam set for",
         
         # Non-functional items to avoid
         "broken", "cracked", "damaged beyond repair", "for parts not working",
-        "does not work", "no sound", "dead", "fried",
+        "does not work", "no sound", "dead", "fried", "blown driver",
         
         # Empty/missing items
         "empty box", "box no headphones", "packaging only"
