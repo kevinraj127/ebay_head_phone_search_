@@ -127,13 +127,28 @@ def create_price_analytics(df):
 def search_headphone_model(model_name, category_id, listing_type_filter, seller_rating_filter, max_price, limit, access_token):
     """Search for a specific headphone model"""
     
-    # Build query with model-specific exclusions
-    if "Bose" in model_name or "Beats" in model_name or "Sony WH" in model_name:
-        # For consumer headphones, exclude common accessories and parts
-        query = f'"{model_name}" -(case,cover,cable,cord,charger,parts,broken,repair,box,manual,accessory,stand,holder)'
-    else:
-        # For professional headphones, be more lenient but still exclude obvious non-items
-        query = f'"{model_name}" -(empty box,manual only,case only,for parts,broken,repair kit)'
+    # Build query with smart exclusions to avoid accessories while keeping refurb opportunities
+    # Exclude standalone accessories and parts, but keep actual headphones that need work
+    exclusions = [
+        # Standalone accessories (not actual headphones)
+        "ear pads only", "pads only", "earpad only", "ear pad", "earpads", 
+        "cable only", "cord only", "wire only", "charger only",
+        "case only", "pouch only", "bag only", "box only",
+        "manual only", "instructions only", "parts only",
+        "replacement parts", "spare parts", "accessory kit",
+        "stand only", "holder only", "hanger only",
+        
+        # Non-functional items to avoid
+        "broken", "cracked", "damaged beyond repair", "for parts not working",
+        "does not work", "no sound", "dead", "fried",
+        
+        # Empty/missing items
+        "empty box", "box no headphones", "packaging only"
+    ]
+    
+    # Create the exclusion string
+    exclusion_string = "(" + ",".join(exclusions) + ")"
+    query = f'"{model_name}" -{exclusion_string}'
 
     # Build filters with minimum price for non-auction listings
     if listing_type_filter in ["Fixed Price", "Best Offer"]:
