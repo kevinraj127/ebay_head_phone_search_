@@ -135,9 +135,17 @@ def search_headphone_model(model_name, category_id, listing_type_filter, seller_
         # For professional headphones, be more lenient but still exclude obvious non-items
         query = f'"{model_name}" -(empty box,manual only,case only,for parts,broken,repair kit)'
 
-    # Build filters
+    # Build filters with minimum price for non-auction listings
+    if listing_type_filter in ["Fixed Price", "Best Offer"]:
+        # Set minimum price to filter out accessories
+        min_price = 25
+        price_filter = f"price:[{min_price}..{max_price}]"
+    else:
+        # For auctions or "All" listings, use the original price filter
+        price_filter = f"price:[1..{max_price}]"
+    
     filters = [
-        f"price:[1..{max_price}]",
+        price_filter,
         "priceCurrency:USD",
         "conditions:{1000|1500|2000|2500|3000}"
     ]
@@ -309,6 +317,10 @@ max_price = st.number_input(
     max_value=10000, 
     value=150
 )
+
+# Add information about minimum price filtering
+if listing_type_filter in ["Fixed Price", "Best Offer"]:
+    st.info("💡 For Fixed Price and Best Offer listings, a minimum price of $25 is automatically applied to filter out accessories and cables.")
 
 limit = st.slider(
     "Number of listings per model:", 
