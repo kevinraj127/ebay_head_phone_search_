@@ -127,9 +127,11 @@ def create_price_analytics(df):
 def search_headphone_model(model_name, category_id, listing_type_filter, seller_rating_filter, max_price, limit, access_token):
     """Search for a specific headphone model"""
     
-    # Build query with smart exclusions to avoid accessories while keeping refurb opportunities
-    # Exclude standalone accessories and parts, but keep actual headphones that need work
-    exclusions = [
+    # Build query with smart exclusions for Fixed Price/Best Offer only
+    # For auctions, use minimal filtering to avoid missing opportunities
+    if listing_type_filter in ["Fixed Price", "Best Offer"]:
+        # Apply strict filtering for Fixed Price and Best Offer listings
+        exclusions = [
         # Standalone accessories (not actual headphones) - be very specific
         "ear pads only", "earpads only", "earpad only", "pads only",
         "ear cushions only", "cushions only", "foam only", 
@@ -143,15 +145,24 @@ def search_headphone_model(model_name, category_id, listing_type_filter, seller_
         "compatible with", "fits", "for use with", "designed for",
         "ltgem case", "khanka case", "co2crea case", "aproca case",
         
+        # Replacement/accessory patterns that indicate standalone parts
+        "replacement for", "replacement earpads for", "replacement ear pads for",
+        "replacement speakers for", "replacement cable for", "replacement cord for",
+        "replacement hifi speakers", "replacement repair upgrade",
+        "pairs replacement", "pair replacement", "x replacement",
+        "premium vegan leather earpads", "perforated replacement earpads",
+        "vegan leather earpads for", "memory foam earpads for",
+        
         # Listings that are clearly just selling accessories/parts (specific patterns)
         "oem ear pads for", "genuine ear pads for", "original ear pads for",
         "replacement pads for", "replacement ear pads for", "replacement cushions for",
-        "ear pads for", "ear cushions for", "pads for",
+        "ear pads for", "ear cushions for", "pads for", "earpads for",
         "headphone cable for", "headphone cord for", "headphone wire for",
         "carrying case for", "storage case for", "travel case for", "headphone case for",
         "carrying pouch for", "storage pouch for", "travel pouch for", "headphone pouch for",
-        "case for", "pouch for",
+        "case for", "pouch for", "bag for",
         "ear pad set for", "cushion set for", "foam set for",
+        "headphone replacement ear pad", "headphones replacement ear",
         
         # Non-functional items to avoid
         "broken", "cracked", "damaged beyond repair", "for parts not working",
