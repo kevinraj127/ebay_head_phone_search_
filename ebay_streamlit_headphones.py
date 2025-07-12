@@ -127,54 +127,71 @@ def create_price_analytics(df):
 def search_headphone_model(model_name, category_id, listing_type_filter, seller_rating_filter, max_price, limit, access_token):
     """Search for a specific headphone model"""
     
-    # Build query with smart exclusions for Fixed Price/Best Offer only
-    # For auctions, use minimal filtering to avoid missing opportunities
+    # Build query with different exclusions based on listing type
     if listing_type_filter in ["Fixed Price", "Best Offer"]:
-        # Apply strict filtering for Fixed Price and Best Offer listings
+        # STRICT FILTERING for Fixed Price and Best Offer listings
         exclusions = [
-        # Standalone accessories (not actual headphones) - be very specific
-        "ear pads only", "earpads only", "earpad only", "pads only",
-        "ear cushions only", "cushions only", "foam only", 
-        "cable only", "cord only", "wire only", "charger only",
-        "case only", "pouch only", "bag only", "box only",
-        "manual only", "instructions only", "parts only",
-        "spare parts", "accessory kit", "accessories only",
-        "stand only", "holder only", "hanger only",
+            # Standalone accessories (not actual headphones) - be very specific
+            "ear pads only", "earpads only", "earpad only", "pads only",
+            "ear cushions only", "cushions only", "foam only", 
+            "cable only", "cord only", "wire only", "charger only",
+            "case only", "pouch only", "bag only", "box only",
+            "manual only", "instructions only", "parts only",
+            "spare parts", "accessory kit", "accessories only",
+            "stand only", "holder only", "hanger only",
+            
+            # Listings that start with compatibility/accessory language (not actual headphones)
+            "compatible with", "fits", "for use with", "designed for",
+            "ltgem case", "khanka case", "co2crea case", "aproca case",
+            
+            # Replacement/accessory patterns that indicate standalone parts
+            "replacement for", "replacement earpads for", "replacement ear pads for",
+            "replacement speakers for", "replacement cable for", "replacement cord for",
+            "replacement hifi speakers", "replacement repair upgrade",
+            "pairs replacement", "pair replacement", "x replacement",
+            "premium vegan leather earpads", "perforated replacement earpads",
+            "vegan leather earpads for", "memory foam earpads for",
+            
+            # Listings that are clearly just selling accessories/parts (specific patterns)
+            "oem ear pads for", "genuine ear pads for", "original ear pads for",
+            "replacement pads for", "replacement ear pads for", "replacement cushions for",
+            "ear pads for", "ear cushions for", "pads for", "earpads for",
+            "headphone cable for", "headphone cord for", "headphone wire for",
+            "carrying case for", "storage case for", "travel case for", "headphone case for",
+            "carrying pouch for", "storage pouch for", "travel pouch for", "headphone pouch for",
+            "case for", "pouch for", "bag for",
+            "ear pad set for", "cushion set for", "foam set for",
+            "headphone replacement ear pad", "headphones replacement ear",
+            
+            # Non-functional items to avoid
+            "broken", "cracked", "damaged beyond repair", "for parts not working",
+            "does not work", "no sound", "dead", "fried", "blown driver",
+            
+            # Empty/missing items
+            "empty box", "box no headphones", "packaging only"
+        ]
         
-        # Listings that start with compatibility/accessory language (not actual headphones)
-        "compatible with", "fits", "for use with", "designed for",
-        "ltgem case", "khanka case", "co2crea case", "aproca case",
+        # Create the exclusion string
+        exclusion_string = "(" + ",".join(exclusions) + ")"
+        query = f'"{model_name}" -{exclusion_string}'
+    else:
+        # =====================================================
+        # AUCTION FILTERING - LESS STRINGENT (MINIMAL EXCLUSIONS)
+        # =====================================================
+        # For auctions and "All" listings, use minimal exclusions to maximize coverage
+        exclusions = [
+            "empty box", 
+            "box no headphones", 
+            "packaging only",
+            "for parts not working", 
+            "does not work", 
+            "no sound", 
+            "dead"
+        ]
         
-        # Replacement/accessory patterns that indicate standalone parts
-        "replacement for", "replacement earpads for", "replacement ear pads for",
-        "replacement speakers for", "replacement cable for", "replacement cord for",
-        "replacement hifi speakers", "replacement repair upgrade",
-        "pairs replacement", "pair replacement", "x replacement",
-        "premium vegan leather earpads", "perforated replacement earpads",
-        "vegan leather earpads for", "memory foam earpads for",
-        
-        # Listings that are clearly just selling accessories/parts (specific patterns)
-        "oem ear pads for", "genuine ear pads for", "original ear pads for",
-        "replacement pads for", "replacement ear pads for", "replacement cushions for",
-        "ear pads for", "ear cushions for", "pads for", "earpads for",
-        "headphone cable for", "headphone cord for", "headphone wire for",
-        "carrying case for", "storage case for", "travel case for", "headphone case for",
-        "carrying pouch for", "storage pouch for", "travel pouch for", "headphone pouch for",
-        "case for", "pouch for", "bag for",
-        "ear pad set for", "cushion set for", "foam set for",
-        "headphone replacement ear pad", "headphones replacement ear",
-        
-        # Non-functional items to avoid
-        "broken", "cracked", "damaged beyond repair", "for parts not working",
-        "does not work", "no sound", "dead", "fried", "blown driver",
-        
-        # Empty/missing items
-        "empty box", "box no headphones", "packaging only"
-    ]
-    
-    # Create the exclusion string
-    exclusion_string = "(" + ",".join(exclusions) + ")"
-    query = f'"{model_name}" -{exclusion_string}'
+        # Create the exclusion string  
+        exclusion_string = "(" + ",".join(exclusions) + ")"
+        query = f'"{model_name}" -{exclusion_string}'
 
     # Build filters with minimum price for non-auction listings
     if listing_type_filter in ["Fixed Price", "Best Offer"]:
